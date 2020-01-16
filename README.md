@@ -5,6 +5,9 @@
   <img src="./assets/teaser.png">
 </div>
 
+## TO DO
+- [ ] **Deep Attentional Multimodal Similarity Model (DAMSM)**
+
 ## Dataset
 ### Text
 * [birds](https://drive.google.com/file/d/1O_LtUP9sch09QH3s_EBAgLEctBQ5JBSJ/view)
