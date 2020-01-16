@@ -1,6 +1,10 @@
 ## AttnGAN &mdash; Simple TensorFlow Implementation [[Paper]](https://arxiv.org/abs/1711.10485)
 ### : Fine-Grained Text to Image Generation with Attentional Generative Adversarial Networks
 
+<div align="center">
+  <img src="./assets/teaser.png">
+</div>
+
 ## Dataset
 ### Text
 * [birds](https://drive.google.com/file/d/1O_LtUP9sch09QH3s_EBAgLEctBQ5JBSJ/view)
