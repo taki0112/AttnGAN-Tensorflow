@@ -392,10 +392,11 @@ class AttnGAN():
             word_emb, sent_emb, mask = self.rnn_encoder(caption, n_words=len(idx_to_word),
                                                         embed_dim=self.embed_dim, drop_rate=0.5, n_hidden=128,
                                                         n_layers=1,
-                                                        bidirectional=True, rnn_type='lstm')
+                                                        bidirectional=True, rnn_type='lstm',
+                                                        is_training=False)
 
             noise = tf.random_normal(shape=[self.batch_size, self.z_dim], mean=0.0, stddev=1.0)
-            fake_imgs, _, _, _ = self.generator(noise, sent_emb, word_emb, mask)
+            fake_imgs, _, _, _ = self.generator(noise, sent_emb, word_emb, mask, is_training=False)
 
             self.test_real_img = real_img_256
             self.test_fake_img = fake_imgs[2]
@@ -520,7 +521,7 @@ class AttnGAN():
         else:
             print(" [!] Load failed...")
 
-        # write html for visual comparisondkssjg
+        # write html for visual comparison
         index_path = os.path.join(self.result_dir, 'index.html')
         index = open(index_path, 'w')
         index.write("<html><body><table><tr>")
