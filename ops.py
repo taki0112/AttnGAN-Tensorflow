@@ -413,8 +413,9 @@ def regularization_loss(scope_name):
 
 def kl_loss(mean, logvar):
     # shape : [batch_size, channel]
-    loss = 0.5 * tf.reduce_sum(tf.square(mean) + tf.exp(logvar) - 1 - logvar, axis=-1)
-    loss = tf.reduce_mean(loss)
+    # loss = 0.5 * tf.reduce_sum(tf.square(mean) + tf.exp(logvar) - 1 - logvar, axis=-1)
+    # loss = tf.reduce_mean(loss)
+    loss = 0.5 * tf.reduce_mean(tf.square(mean) + tf.exp(logvar) - 1 - logvar)
 
     return loss
 
