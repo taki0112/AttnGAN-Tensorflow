@@ -9,9 +9,9 @@ def parse_args():
     parser.add_argument('--phase', type=str, default='train', choices=('train', 'test'), help='phase name')
     parser.add_argument('--dataset', type=str, default='birds', help='dataset_name')
 
-    parser.add_argument('--iteration', type=int, default=500000, help='The number of training iterations')
-    parser.add_argument('--decay_flag', type=str2bool, default=False, help='The decay_flag')
-    parser.add_argument('--decay_iter', type=int, default=100000, help='decay epoch')
+    parser.add_argument('--iteration', type=int, default=1000000, help='The number of training iterations')
+    parser.add_argument('--decay_flag', type=str2bool, default=True, help='The decay_flag')
+    parser.add_argument('--decay_iter', type=int, default=500000, help='decay epoch')
 
     parser.add_argument('--batch_size', type=int, default=16, help='The size of batch size for each gpu')
     parser.add_argument('--print_freq', type=int, default=1000, help='The number of image_print_freq')
@@ -34,7 +34,7 @@ def parse_args():
     parser.add_argument('--img_height', type=int, default=256, help='The height size of image')
     parser.add_argument('--img_width', type=int, default=256, help='The width size of image ')
     parser.add_argument('--img_ch', type=int, default=3, help='The size of image channel')
-    parser.add_argument('--augment_flag', type=str2bool, default=True, help='Image augmentation use or not')
+    parser.add_argument('--augment_flag', type=str2bool, default=False, help='Image augmentation use or not')
 
     parser.add_argument('--checkpoint_dir', type=str, default='checkpoint',
                         help='Directory name to save the checkpoints')
