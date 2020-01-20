@@ -210,10 +210,11 @@ def attention_net(x, word_emb, mask, channels, use_bias=True, sn=False, scope='a
         word_emb = tf.squeeze(word_emb, axis=1)
 
 
-        attn = tf.matmul(x, word_emb, transpose_b=True) # [bs, hw, emb_dim]
+        attn = tf.matmul(x, word_emb, transpose_b=True) # [bs, hw, seq_len]
+        attn = tf.reshape(attn, shape=[bs * hw, seq_len])
 
 
-        mask = tf.tile(tf.expand_dims(mask, 1), multiples=[1, hw, 1])
+        mask = tf.tile(mask, multiples=[hw, 1])
         attn = tf.where(tf.equal(mask, True), x=tf.constant(-float('inf'), dtype=tf.float32, shape=mask.shape), y=attn)
         attn = tf.nn.softmax(attn)
 
