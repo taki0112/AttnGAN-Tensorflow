@@ -17,7 +17,7 @@ def parse_args():
     parser.add_argument('--print_freq', type=int, default=1000, help='The number of image_print_freq')
     parser.add_argument('--save_freq', type=int, default=10000, help='The number of ckpt_save_freq')
 
-    parser.add_argument('--lr', type=float, default=0.0002, help='The learning rate')
+    parser.add_argument('--lr', type=float, default=0.0001, help='The learning rate')
 
     parser.add_argument('--gan_type', type=str, default='gan', help='[gan / lsgan / hinge]')
 

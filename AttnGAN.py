@@ -293,7 +293,7 @@ class AttnGAN():
         img_data_class = Image_data(self.img_height, self.img_width, self.img_ch, self.dataset_path, self.augment_flag)
         train_captions, train_images, test_captions, test_images, idx_to_word, word_to_idx = img_data_class.preprocess()
         """
-        train_captions: (8855, 10, 66), test_captions: (2933, 10, 66)
+        train_captions: (8855, 10, 18), test_captions: (2933, 10, 18)
         train_images: (8855,), test_images: (2933,)
         idx_to_word : 5450 5450
         """

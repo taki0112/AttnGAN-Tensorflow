@@ -48,7 +48,8 @@ class Image_data:
 
             train_captions = x[0]
             test_captions = x[1]
-            n_max_words = get_n_max_words(train_captions, test_captions)
+            # n_max_words = get_n_max_words(train_captions, test_captions)
+            n_max_words = 18
 
             train_captions = pad_sequence(train_captions, n_max_words, mode='post') # [-1, 10, n_max_words]
             test_captions = pad_sequence(test_captions, n_max_words, mode='post') # [-1, 10, n_max_words]
@@ -207,13 +208,14 @@ def pytorch_kaiming_weight_factor(a=0.0, activation_function='leaky_relu', unifo
     return factor, mode, uniform
 
 def pad_sequence(captions, n_max_words, mode='post') :
-
     if mode == 'post' :
         for i in range(len(captions)):
+            captions[i] = captions[i][:n_max_words]
             captions[i] = captions[i] + [0] * (n_max_words - len(captions[i]))
     else :
         # pre pad mode
         for i in range(len(captions)):
+            captions[i] = captions[i][:n_max_words]
             captions[i] = [0] * (n_max_words - len(captions[i])) + captions[i]
 
     captions = np.reshape(captions, [-1, 10, n_max_words])
