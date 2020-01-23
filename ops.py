@@ -347,20 +347,29 @@ def discriminator_loss(gan_type, real_logit, fake_logit):
     real_loss = 0
     fake_loss = 0
 
-    if gan_type == 'lsgan':
-        real_loss = tf.reduce_mean(tf.squared_difference(real_logit, 1.0))
-        fake_loss = tf.reduce_mean(tf.square(fake_logit))
+    if real_logit is None :
+        if gan_type == 'lsgan':
+            fake_loss = tf.reduce_mean(tf.square(fake_logit))
+        if gan_type == 'gan':
+            fake_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.zeros_like(fake_logit), logits=fake_logit))
 
-    if gan_type == 'gan':
-        real_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones_like(real_logit), logits=real_logit))
-        fake_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.zeros_like(fake_logit), logits=fake_logit))
+        if gan_type == 'hinge':
+            fake_loss = tf.reduce_mean(relu(1 + fake_logit))
+    else :
+        if gan_type == 'lsgan':
+            real_loss = tf.reduce_mean(tf.squared_difference(real_logit, 1.0))
+            fake_loss = tf.reduce_mean(tf.square(fake_logit))
 
-    if gan_type == 'hinge':
+        if gan_type == 'gan':
+            real_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones_like(real_logit), logits=real_logit))
+            fake_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.zeros_like(fake_logit), logits=fake_logit))
 
-        real_loss = tf.reduce_mean(relu(1 - real_logit))
-        fake_loss = tf.reduce_mean(relu(1 + fake_logit))
+        if gan_type == 'hinge':
 
-    return real_loss + fake_loss
+            real_loss = tf.reduce_mean(relu(1 - real_logit))
+            fake_loss = tf.reduce_mean(relu(1 + fake_logit))
+
+    return real_loss, fake_loss
 
 
 def generator_loss(gan_type, fake_logit):

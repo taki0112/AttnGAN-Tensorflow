@@ -328,12 +328,18 @@ class AttnGAN():
             fake_img_64, fake_img_128, fake_img_256 = fake_imgs[0], fake_imgs[1], fake_imgs[2]
 
             uncond_real_logits, cond_real_logits = self.discriminator([real_img_64, real_img_128, real_img_256], sent_emb)
+            _, cond_wrong_logits = self.discriminator([real_img_64[:(self.batch_size - 1)], real_img_128[:(self.batch_size - 1)], real_img_256[:(self.batch_size - 1)]], sent_emb[1:self.batch_size])
             uncond_fake_logits, cond_fake_logits = self.discriminator([fake_img_64, fake_img_128, fake_img_256], sent_emb)
 
             self.g_adv_loss, self.d_adv_loss = 0, 0
             for i in range(3):
                 self.g_adv_loss += self.adv_weight * (generator_loss(self.gan_type, uncond_fake_logits[i]) + generator_loss(self.gan_type, cond_fake_logits[i]))
-                self.d_adv_loss += self.adv_weight * (discriminator_loss(self.gan_type, uncond_real_logits[i], uncond_fake_logits[i]) + discriminator_loss(self.gan_type, cond_real_logits[i], cond_fake_logits[i])) / 2
+
+                uncond_real_loss, uncond_fake_loss = discriminator_loss(self.gan_type, uncond_real_logits[i], uncond_fake_logits[i])
+                cond_real_loss, cond_fake_loss = discriminator_loss(self.gan_type, cond_real_logits[i], cond_fake_logits[i])
+                _, cond_wrong_loss = discriminator_loss(self.gan_type, None, cond_wrong_logits[i])
+
+                self.d_adv_loss += self.adv_weight * (((uncond_real_loss + cond_real_loss) / 2) + (uncond_fake_loss + cond_fake_loss + cond_wrong_loss) / 3)
 
             self.g_kl_loss = self.kl_weight * kl_loss(mu, logvar)
 
