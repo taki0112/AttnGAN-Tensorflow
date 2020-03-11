@@ -13,22 +13,21 @@ def parse_args():
     parser.add_argument('--decay_flag', type=str2bool, default=True, help='The decay_flag')
     parser.add_argument('--decay_iter', type=int, default=500000, help='decay epoch')
 
-    parser.add_argument('--batch_size', type=int, default=8, help='The size of batch size for each gpu')
+    parser.add_argument('--batch_size', type=int, default=16, help='The size of batch size for each gpu')
     parser.add_argument('--print_freq', type=int, default=1000, help='The number of image_print_freq')
     parser.add_argument('--save_freq', type=int, default=10000, help='The number of ckpt_save_freq')
 
-    parser.add_argument('--lr', type=float, default=0.0002, help='The learning rate')
+    parser.add_argument('--lr', type=float, default=0.0001, help='The learning rate')
 
     parser.add_argument('--gan_type', type=str, default='gan', help='[gan / lsgan / hinge]')
 
     parser.add_argument('--adv_weight', type=int, default=1, help='Weight about GAN')
     parser.add_argument('--kl_weight', type=int, default=1, help='Weight about kl_loss')
-    parser.add_argument('--embed_weight', type=int, default=1, help='Weight about embed_weight')
 
     parser.add_argument('--z_dim', type=int, default=100, help='condition & noise z dimension')
     parser.add_argument('--embed_dim', type=int, default=256, help='embedding dimension')
-    parser.add_argument('--g_dim', type=int, default=32, help='generator feature basic dimension')
-    parser.add_argument('--d_dim', type=int, default=64, help='discriminaotr feature basic dimension')
+    parser.add_argument('--gf_dim', type=int, default=32, help='generator feature basic dimension')
+    parser.add_argument('--df_dim', type=int, default=64, help='discriminaotr feature basic dimension')
 
     parser.add_argument('--sn', type=str2bool, default=False, help='using spectral norm')
 
@@ -73,21 +72,26 @@ def check_args(args):
 def main():
     # parse arguments
     args = parse_args()
+    if args is None:
+      exit()
 
-    # automatic_gpu_usage()
+    # open session
+    with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
+        gan = AttnGAN(sess, args)
 
-    gan = AttnGAN(args)
+        # build graph
+        gan.build_model()
 
-    # build graph
-    gan.build_model()
+        # show network architecture
+        show_all_variables()
 
-    if args.phase == 'train':
-        gan.train()
-        print(" [*] Training finished!")
+        if args.phase == 'train' :
+            gan.train()
+            print(" [*] Training finished!")
 
-    if args.phase == 'test':
-        gan.test()
-        print(" [*] Test finished!")
+        if args.phase == 'test' :
+            gan.test()
+            print(" [*] Test finished!")
 
 
 

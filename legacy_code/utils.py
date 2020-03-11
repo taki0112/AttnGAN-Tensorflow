@@ -1,5 +1,5 @@
 import tensorflow as tf
-import random
+from tensorflow.contrib import slim
 import os
 import numpy as np
 import cv2
@@ -19,28 +19,25 @@ class Image_data:
 
         self.train_image_filename_pickle = os.path.join(self.text_path, 'filenames_train.pickle')
         self.test_image_filename_pickle = os.path.join(self.text_path, 'filenames_test.pickle')
-        self.caption_pickle = os.path.join(self.text_path, 'bird_captions.pickle')
-        self.class_info_pickle = os.path.join(self.text_path, 'class_info.pickle')
+        self.caption_pickle = os.path.join(self.text_path, 'captions.pickle')
 
 
-    def image_processing(self, filename, captions, class_id=None):
-        x = tf.io.read_file(filename)
+    def image_processing(self, filename, captions):
+        x = tf.read_file(filename)
         x_decode = tf.image.decode_jpeg(x, channels=self.channels, dct_method='INTEGER_ACCURATE')
-        img = tf.image.resize(x_decode, [self.img_height, self.img_width])
+        img = tf.image.resize_images(x_decode, [self.img_height, self.img_width])
         img = tf.cast(img, tf.float32) / 127.5 - 1
+
 
         if self.augment_flag :
             augment_height_size = self.img_height + (30 if self.img_height == 256 else int(self.img_height * 0.1))
             augment_width_size = self.img_width + (30 if self.img_width == 256 else int(self.img_width * 0.1))
 
-            seed = random.randint(0, 2 ** 31 - 1)
-            condition = tf.greater_equal(tf.random.uniform(shape=[], minval=0.0, maxval=1.0), 0.5)
-
-            img = tf.cond(pred=condition,
-                          true_fn=lambda : augmentation(img, augment_height_size, augment_width_size, seed),
+            img = tf.cond(pred=tf.greater_equal(tf.random_uniform(shape=[], minval=0.0, maxval=1.0), 0.5),
+                          true_fn=lambda : augmentation(img, augment_height_size, augment_width_size),
                           false_fn=lambda : img)
 
-        return img, captions, class_id
+        return img, captions
 
     def preprocess(self):
         train_images = []
@@ -82,10 +79,7 @@ class Image_data:
 
                 test_images.append(os.path.join(self.image_path, folder_name, file_name))
 
-        with open(self.class_info_pickle, 'rb') as f:
-            class_id = pickle.load(f, encoding='latin1')
-
-        return class_id, train_captions, train_images, test_captions, test_images, idx_to_word, word_to_idx
+        return train_captions, train_images, test_captions, test_images, idx_to_word, word_to_idx
 
 def load_test_image(image_path, img_width, img_height, img_channel):
 
@@ -121,11 +115,15 @@ def adjust_dynamic_range(images):
     images = images * scale + bias
     return images
 
-def augmentation(image, augment_height, augment_width, seed):
+def augmentation(image, augment_height, augment_width):
+    seed = np.random.randint(0, 2 ** 31 - 1)
+
     ori_image_shape = tf.shape(image)
     image = tf.image.random_flip_left_right(image, seed=seed)
-    image = tf.image.resize(image, [augment_height, augment_width])
-    image = tf.image.random_crop(image, ori_image_shape, seed=seed)
+    image = tf.image.resize(image, size=[augment_height, augment_width], method=tf.image.ResizeMethod.BILINEAR)
+    image = tf.random_crop(image, ori_image_shape, seed=seed)
+
+
     return image
 
 def save_images(images, size, image_path):
@@ -165,6 +163,10 @@ def return_images(images, size) :
     x = merge(images, size)
 
     return x
+
+def show_all_variables():
+    model_vars = tf.trainable_variables()
+    slim.model_analyzer.analyze_vars(model_vars, print_info=True)
 
 def check_folder(log_dir):
     if not os.path.exists(log_dir):
@@ -209,12 +211,12 @@ def pad_sequence(captions, n_max_words, mode='post') :
     if mode == 'post' :
         for i in range(len(captions)):
             captions[i] = captions[i][:n_max_words]
-            captions[i] = captions[i] + [2] * (n_max_words - len(captions[i]))
+            captions[i] = captions[i] + [0] * (n_max_words - len(captions[i]))
     else :
         # pre pad mode
         for i in range(len(captions)):
             captions[i] = captions[i][:n_max_words]
-            captions[i] = [2] * (n_max_words - len(captions[i])) + captions[i]
+            captions[i] = [0] * (n_max_words - len(captions[i])) + captions[i]
 
     captions = np.reshape(captions, [-1, 10, n_max_words])
     return captions
@@ -229,16 +231,3 @@ def get_n_max_words(train_captions, test_captions):
         n_max_words = max(len(caption), n_max_words)
 
     return n_max_words
-
-def automatic_gpu_usage() :
-    gpus = tf.config.experimental.list_physical_devices('GPU')
-    if gpus:
-        try:
-            # Currently, memory growth needs to be the same across GPUs
-            for gpu in gpus:
-                tf.config.experimental.set_memory_growth(gpu, True)
-            logical_gpus = tf.config.experimental.list_logical_devices('GPU')
-            print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
-        except RuntimeError as e:
-            # Memory growth must be set before GPUs have been initialized
-            print(e)
