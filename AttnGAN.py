@@ -1,7 +1,7 @@
 from utils import *
 import time
 from tensorflow.python.data.experimental import prefetch_to_device, shuffle_and_repeat, map_and_batch # >= tf 1.15
-from class_module import *
+from networks import *
 
 class AttnGAN():
     def __init__(self, args):

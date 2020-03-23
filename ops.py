@@ -1,8 +1,5 @@
 import tensorflow as tf
 import numpy as np
-import tensorflow_addons as tfa
-from tensorflow.keras import Sequential
-from utils import pytorch_xavier_weight_factor, pytorch_kaiming_weight_factor
 
 weight_initializer = tf.initializers.RandomNormal(mean=0.0, stddev=0.02)
 weight_regularizer = tf.keras.regularizers.l2(0.0001)
